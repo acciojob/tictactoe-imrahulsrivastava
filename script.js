@@ -36,7 +36,7 @@ function togglePlayerInput(e) {
   if (e === "won") {
     message.innerText = `${
       count % 2 !== 0 ? playersName[1] : playersName[0]
-    }, congratulations you won!`;
+    } congratulations you won!`;
     grids.forEach((e) => {
       e.removeEventListener("click", togglePlayerInput);
     });
@@ -44,9 +44,9 @@ function togglePlayerInput(e) {
   }
 
   if (count % 2 !== 0) {
-    e.target.innerText = "X";
+    e.target.innerText = "x";
   } else {
-    e.target.innerText = "O";
+    e.target.innerText = "o";
   }
 
   let value = checkIfPlayerHasWon();
