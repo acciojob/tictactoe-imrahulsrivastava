@@ -1,86 +1,120 @@
-const statusDisplay = document.querySelector(".game--status");
-// console.log(statusDisplay);
-let gameActive = true;
-let currentPlayer = "X";
-let gameState = ["", "", "", "", "", "", "", "", ""];
-const winningMessage = () =>
-  `Congratulations! Player${currentPlayer === "X" ? 1 : 2} wins.`;
-const drawMessage = "Draw!";
-const currentPlayerTurn = () =>
-  `It's Player${currentPlayer === "X" ? 1 : 2}'s turn`;
-statusDisplay.innerHTML = currentPlayerTurn();
-const winningConditions = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-];
-// document
-//   .querySelectorAll(".cell")
-//   .forEach((cell) => cell.addEventListener("click", handleCellClick));
-// fixed by Event Delegation
-// Instead of adding listener to individual child elements, add a listener to the parent element
-// then access the clicked child through event.target
-document
-  .querySelector(".game--container")
-  .addEventListener("click", handleCellClick);
-document
-  .querySelector(".game--restart")
-  .addEventListener("click", handleRestartGame);
-function handleCellClick(clickedCellEvent) {
-  if (clickedCellEvent.target.classList.contains("cell")) {
-    const clickedCell = clickedCellEvent.target;
-    const clickedCellIndex = parseInt(clickedCell.id) - 1;
-    if (!gameActive || gameState[clickedCellIndex] !== "") return;
-    handleCellPlayed(clickedCell, clickedCellIndex);
-    handleResultValidation();
-  }
-}
-function handleRestartGame() {
-  gameActive = true;
-  currentPlayer = "X";
-  gameState = ["", "", "", "", "", "", "", "", ""];
-  statusDisplay.innerHTML = currentPlayerTurn();
-  document.querySelectorAll(".cell").forEach((cell) => (cell.innerHTML = ""));
-}
-function handleCellPlayed(clickedCell, clickedCellIndex) {
-  gameState[clickedCellIndex] = currentPlayer;
-  clickedCell.innerHTML = currentPlayer;
+// Write your script here
+
+const form = document.querySelector("#inputs");
+const gridsContainer = document.querySelector("#grids");
+const message = document.querySelector(".message");
+message.style.fontWeight = "bold";
+const playersName = [];
+let count = 1;
+
+const grids = document.querySelectorAll(".grid");
+grids.forEach((e) => {
+  e.addEventListener("click", togglePlayerInput);
+});
+
+form.addEventListener("submit", toggleView);
+
+function toggleView(e) {
+  e.preventDefault();
+  form.style.display = "none";
+  gridsContainer.style.display = "grid";
+  playersName.push(form.playerA.value.trim());
+  playersName.push(form.playerB.value.trim());
+  togglePlayerName(e);
+  form.reset();
 }
 
-function handleResultValidation() {
-  let roundWon = false;
-  for (let i = 0; i < winningConditions.length; i++) {
-    const winCondition = winningConditions[i];
-    let a = gameState[winCondition[0]];
-    let b = gameState[winCondition[1]];
-    let c = gameState[winCondition[2]];
-    if (a === "" || b === "" || c === "") continue;
-    if (a === b && b === c) {
-      roundWon = true;
-      break;
-    }
+function togglePlayerName() {
+  if (count % 2 !== 0) {
+    message.innerText = `${playersName[0]}, you're up`;
+  } else {
+    message.innerText = `${playersName[1]}, you're up`;
   }
-  // checking if someone won
-  if (roundWon) {
-    statusDisplay.innerHTML = winningMessage();
-    gameActive = false;
-    return;
-  }
-  let roundDraw = !gameState.includes("");
-  if (roundDraw) {
-    statusDisplay.innerHTML = drawMessage;
-    gameActive = false;
-    return;
-  }
-  // keep the game going!
-  handlePlayerChange();
+  count++;
 }
-function handlePlayerChange() {
-  currentPlayer = currentPlayer === "X" ? "O" : "X";
-  statusDisplay.innerHTML = currentPlayerTurn();
+
+function togglePlayerInput(e) {
+  if (e === "won") {
+    message.innerText = `${
+      count % 2 !== 0 ? playersName[1] : playersName[0]
+    } congratulations you won!`;
+    grids.forEach((e) => {
+      e.removeEventListener("click", togglePlayerInput);
+    });
+    return;
+  }
+
+  if (count % 2 !== 0) {
+    e.target.innerText = "o";
+  } else {
+    e.target.innerText = "x";
+  }
+
+  let value = checkIfPlayerHasWon();
+  if (value !== undefined) {
+    playerWon(value);
+    return;
+  }
+
+  togglePlayerName();
+}
+
+function checkIfPlayerHasWon() {
+  if (
+    grids[0].innerText === grids[1].innerText &&
+    grids[1].innerText === grids[2].innerText &&
+    grids[0].innerText !== ""
+  ) {
+    return [0, 1, 2];
+  } else if (
+    grids[3].innerText === grids[4].innerText &&
+    grids[4].innerText === grids[5].innerText &&
+    grids[3].innerText !== ""
+  ) {
+    return [3, 4, 5];
+  } else if (
+    grids[6].innerText === grids[7].innerText &&
+    grids[7].innerText === grids[8].innerText &&
+    grids[6].innerText !== ""
+  ) {
+    return [6, 7, 8];
+  } else if (
+    grids[0].innerText === grids[3].innerText &&
+    grids[3].innerText === grids[6].innerText &&
+    grids[0].innerText !== ""
+  ) {
+    return [0, 3, 6];
+  } else if (
+    grids[1].innerText === grids[4].innerText &&
+    grids[4].innerText === grids[7].innerText &&
+    grids[1].innerText !== ""
+  ) {
+    return [1, 4, 7];
+  } else if (
+    grids[2].innerText === grids[5].innerText &&
+    grids[5].innerText === grids[8].innerText &&
+    grids[2].innerText !== ""
+  ) {
+    return [2, 5, 8];
+  } else if (
+    grids[0].innerText === grids[4].innerText &&
+    grids[4].innerText === grids[8].innerText &&
+    grids[0].innerText !== ""
+  ) {
+    return [0, 4, 8];
+  } else if (
+    grids[2].innerText === grids[4].innerText &&
+    grids[4].innerText === grids[6].innerText &&
+    grids[2].innerText !== ""
+  ) {
+    return [2, 4, 6];
+  }
+}
+
+function playerWon(value) {
+  value.forEach((e) => {
+    grids[e].style.backgroundColor = "rgb(128,0,128)";
+  });
+
+  togglePlayerInput("won");
 }
